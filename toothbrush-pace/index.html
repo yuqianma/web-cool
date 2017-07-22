@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Toothbrush Pace</title>
+  <script src="//cdn.bootcss.com/d3/4.10.0/d3.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+    .shape {
+      float: left;
+    }
+    .tooth-svg {
+      outline: 1px solid #eee;
+    }
+    .tooth-path {
+      fill: #ddd;
+      stroke: #0b9;
+      stroke-width: 5;
+      stroke-linecap: round;
+    }
+    .description {
+      display: inline-block;
+      margin: 1em;
+      font-family: Avenir, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #246;
+    }
+  </style>
+</head>
+<body>
+<div class="shape"></div>
+<span class="description">
+  Click on anywhere
+</span>
+<script>
+var WIDTH = 400, HEIGHT = 360
+
+var pointsUpLeft = [[124,58],[105,150],[80,175],[55,170],[41,140],[101,4]]
+var pointsUp = pointsUpLeft.concat(pointsUpLeft.map(p => [WIDTH - p[0], p[1]]).reverse())
+pointsUp = pointsUp.concat(pointsUp.splice(0, 2))
+var pointsDown = pointsUp.map(p => [p[0], HEIGHT - p[1]])
+
+var line = d3.line().curve(d3.curveBasisClosed)
+
+var svg = d3.select('.shape')
+  .append('svg')
+  .classed('tooth-svg', true)
+  .attr('width', WIDTH)
+  .attr('height', HEIGHT)
+
+var up = svg.append('path')
+  .datum(pointsUp)
+  .attr('class', 'tooth-path up')
+  .attr('d', line)
+
+var down = svg.append('path')
+  .datum(pointsDown)
+  .attr('class', 'tooth-path down')
+  .attr('d', line)
+
+var lineLength = up.node().getTotalLength()
+
+up.attr("stroke-dasharray", lineLength + " " + lineLength)
+  .attr("stroke-dashoffset", lineLength)
+  
+down.attr("stroke-dasharray", lineLength + " " + lineLength)
+  .attr("stroke-dashoffset", lineLength)
+
+document.addEventListener('click', function (e) {
+  start()
+})
+
+function start () {
+  var partTime = 30
+
+  down.interrupt().attr("stroke-dashoffset", lineLength)
+  up.interrupt().attr("stroke-dashoffset", lineLength)
+
+  down.transition()
+    .duration(partTime * 2 * 1000)
+    .ease(d3.easeLinear)
+    .attr("stroke-dashoffset", 0)
+    .on('end', function (e) {
+      up.transition()
+        .duration(partTime * 2 * 1000)
+        .ease(d3.easeLinear)
+        .attr("stroke-dashoffset", 0)
+    })
+}
+
+</script>
+</body>
+</html>
