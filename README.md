@@ -1,0 +1,3 @@
+# web-cool
+
+Browser-only
